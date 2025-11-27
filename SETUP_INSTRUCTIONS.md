@@ -36,6 +36,8 @@
 1. Crie um .env na raiz com:
    `ash
    VITE_GOOGLE_CLIENT_ID=SEU_CLIENT_ID.apps.googleusercontent.com
+   # opcional: altere escopos se precisar
+   # VITE_GOOGLE_SCOPES="https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
    `
 2. Rode 
 pm run dev e faça login com sua conta Google.

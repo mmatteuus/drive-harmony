@@ -1,15 +1,17 @@
-﻿import { useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CloudIcon, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
-const GOOGLE_SCOPES = [
-  "https://www.googleapis.com/auth/drive.file",
-  "https://www.googleapis.com/auth/userinfo.profile",
-  "https://www.googleapis.com/auth/userinfo.email",
-].join(" ");
+const GOOGLE_SCOPES =
+  import.meta.env.VITE_GOOGLE_SCOPES ||
+  [
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email",
+  ].join(" ");
 
 declare global {
   interface Window {
@@ -22,42 +24,29 @@ const Login = () => {
   const [googleReady, setGoogleReady] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const token = localStorage.getItem("google_access_token");
-    if (token) {
-      navigate("/dashboard");
-      return;
-    }
+  const verifyDriveAccess = useCallback(async (accessToken: string) => {
+    try {
+      const response = await fetch("https://www.googleapis.com/drive/v3/about?fields=user", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-    if (window.google?.accounts?.oauth2) {
-      setGoogleReady(true);
-      return;
-    }
-
-    const existingScript = document.querySelector<HTMLScriptElement>('script[src="https://accounts.google.com/gsi/client"]');
-    if (existingScript) {
-      if (window.google?.accounts?.oauth2) {
-        setGoogleReady(true);
-      } else {
-        existingScript.addEventListener("load", () => setGoogleReady(true), { once: true });
+      if (!response.ok) {
+        throw new Error(`Drive API error ${response.status}`);
       }
-      return;
+
+      const data = await response.json();
+      if (!data?.user?.emailAddress) {
+        throw new Error("Credenciais inválidas");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Erro ao validar Drive:", error);
+      toast.error("Não foi possível conectar ao Google Drive. Tente novamente.");
+      localStorage.removeItem("google_access_token");
+      return null;
     }
-
-    const script = document.createElement("script");
-    script.id = "google-identity-script";
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => setGoogleReady(true);
-    script.onerror = () => toast.error("Não foi possível carregar o Google Identity Services");
-    document.body.appendChild(script);
-
-    return () => {
-      script.onload = null;
-      script.onerror = null;
-    };
-  }, [navigate]);
+  }, []);
 
   const handleSignIn = () => {
     if (!GOOGLE_CLIENT_ID) {
@@ -75,20 +64,67 @@ const Login = () => {
       client_id: GOOGLE_CLIENT_ID,
       scope: GOOGLE_SCOPES,
       prompt: "consent",
-      callback: (tokenResponse) => {
-        if (tokenResponse?.access_token) {
-          localStorage.setItem("google_access_token", tokenResponse.access_token);
-          toast.success("Conexão com o Google Drive concluída.");
-          navigate("/dashboard");
-        } else {
+      callback: async (tokenResponse) => {
+        if (!tokenResponse?.access_token) {
           toast.error("Não foi possível obter o token de acesso.");
+          setLoading(false);
+          return;
         }
+
+        localStorage.setItem("google_access_token", tokenResponse.access_token);
+        const isValid = await verifyDriveAccess(tokenResponse.access_token);
         setLoading(false);
+
+        if (!isValid) return;
+
+        toast.success("Conexão com o Google Drive concluída.");
+        navigate("/dashboard");
       },
     });
 
     client.requestAccessToken();
   };
+
+  useEffect(() => {
+    const initGoogleScript = () => {
+      if (window.google?.accounts?.oauth2) {
+        setGoogleReady(true);
+        return;
+      }
+
+      const existingScript = document.querySelector<HTMLScriptElement>(
+        'script[src="https://accounts.google.com/gsi/client"]',
+      );
+      if (existingScript) {
+        if (window.google?.accounts?.oauth2) {
+          setGoogleReady(true);
+        } else {
+          existingScript.addEventListener("load", () => setGoogleReady(true), { once: true });
+        }
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = "google-identity-script";
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = () => setGoogleReady(true);
+      script.onerror = () => toast.error("Não foi possível carregar o Google Identity Services");
+      document.body.appendChild(script);
+    };
+
+    const validateExistingSession = async () => {
+      const token = localStorage.getItem("google_access_token");
+      if (!token) return;
+      const isValid = await verifyDriveAccess(token);
+      if (isValid) {
+        navigate("/dashboard");
+      }
+    };
+
+    validateExistingSession().finally(initGoogleScript);
+  }, [navigate, verifyDriveAccess]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary to-background p-4">

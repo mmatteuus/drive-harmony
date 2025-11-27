@@ -21,6 +21,8 @@ Portal web responsivo que coloca uma camada de UX em cima do seu Google Drive. C
 3. **Variáveis de ambiente**: crie um arquivo .env na raiz com:
    `ash
    VITE_GOOGLE_CLIENT_ID=SEU_CLIENT_ID.apps.googleusercontent.com
+   # opcional: altere escopos se precisar
+   # VITE_GOOGLE_SCOPES="https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email"
    `
 4. **Rodar localmente**:
    `ash
@@ -35,7 +37,7 @@ Portal web responsivo que coloca uma camada de UX em cima do seu Google Drive. C
 ## Como obter o Client ID do Google
 1. Crie um projeto em [Google Cloud Console](https://console.cloud.google.com/).
 2. Habilite **Google Drive API** e configure a tela de consentimento OAuth.
-3. Crie um OAuth Client ID do tipo **Web application** com seus domains/URLs de origem.
+3. Crie um OAuth Client ID do tipo **Web application** com seus domínios/URLs de origem.
 4. Copie o Client ID gerado e coloque na variável VITE_GOOGLE_CLIENT_ID.
 
 ## Estrutura

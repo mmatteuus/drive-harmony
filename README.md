@@ -1,73 +1,52 @@
-# Welcome to your Lovable project
+﻿# Drive Harmony
 
-## Project info
+Portal web responsivo que coloca uma camada de UX em cima do seu Google Drive. Conecte com sua conta Google, navegue por pastas, pesquise, faça upload e download sem sair da aplicação.
 
-**URL**: https://lovable.dev/projects/e4a6beb3-a535-4757-8e0a-c17ef9dd0cc8
+## Funcionalidades
+- Login com Google (Google Identity Services + Drive API v3)
+- Listagem de arquivos/pastas com filtros por texto, tipo, data e tags (appProperties)
+- Breadcrumb para navegar entre pastas
+- Upload de arquivos com metadados personalizados
+- Criação de pastas direto do dashboard
+- Download e abertura no Google Drive
+- Drawer de detalhes do arquivo
+- Drawer de conta com uso de armazenamento (Drive bout.get)
 
-## How can I edit this code?
+## Configuração rápida
+1. **Pré-requisitos**: Node.js 18+ e npm.
+2. **Instalação**:
+   `ash
+   npm install
+   `
+3. **Variáveis de ambiente**: crie um arquivo .env na raiz com:
+   `ash
+   VITE_GOOGLE_CLIENT_ID=SEU_CLIENT_ID.apps.googleusercontent.com
+   `
+4. **Rodar localmente**:
+   `ash
+   npm run dev
+   `
+5. **Build de produção**:
+   `ash
+   npm run build
+   npm run preview
+   `
 
-There are several ways of editing your application.
+## Como obter o Client ID do Google
+1. Crie um projeto em [Google Cloud Console](https://console.cloud.google.com/).
+2. Habilite **Google Drive API** e configure a tela de consentimento OAuth.
+3. Crie um OAuth Client ID do tipo **Web application** com seus domains/URLs de origem.
+4. Copie o Client ID gerado e coloque na variável VITE_GOOGLE_CLIENT_ID.
 
-**Use Lovable**
+## Estrutura
+- src/pages – páginas (Login, Dashboard, NotFound)
+- src/components/dashboard – componentes da área logada (grid, filtros, upload, detalhes, etc.)
+- src/components/ui – componentes de base (shadcn/ui)
+- public – favicon e arte de compartilhamento (og-image.svg)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e4a6beb3-a535-4757-8e0a-c17ef9dd0cc8) and start prompting.
+## Segurança
+- Tokens de acesso ficam apenas no navegador (localStorage) e são enviados direto à Google Drive API.
+- Nenhum conteúdo de arquivo é armazenado pela aplicação.
+- Você pode revogar o acesso a qualquer momento em https://myaccount.google.com/permissions.
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/e4a6beb3-a535-4757-8e0a-c17ef9dd0cc8) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Desenvolvido por MtsFerreira

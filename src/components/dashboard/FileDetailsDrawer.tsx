@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+﻿import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Download, ExternalLink } from "lucide-react";
 import type { DriveFile } from "@/pages/Dashboard";
@@ -20,7 +20,7 @@ export const FileDetailsDrawer = ({ file, onClose }: FileDetailsDrawerProps) => 
         `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
         {
           headers: { Authorization: `Bearer ${token}` },
-        }
+        },
       );
 
       if (response.ok) {
@@ -46,7 +46,8 @@ export const FileDetailsDrawer = ({ file, onClose }: FileDetailsDrawerProps) => 
     const size = parseInt(bytes);
     if (size < 1024) return `${size} B`;
     if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    if (size < 1024 * 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(size / (1024 * 1024 * 1024)).toFixed(1)} GB`;
   };
 
   return (
@@ -58,7 +59,7 @@ export const FileDetailsDrawer = ({ file, onClose }: FileDetailsDrawerProps) => 
         {file && (
           <div className="mt-6 space-y-6">
             <div>
-              <h3 className="font-semibold text-lg mb-4">{file.name}</h3>
+              <h3 className="font-semibold text-lg mb-4 break-words">{file.name}</h3>
               <div className="space-y-3 text-sm">
                 <div>
                   <p className="text-muted-foreground">Tipo</p>
@@ -78,6 +79,13 @@ export const FileDetailsDrawer = ({ file, onClose }: FileDetailsDrawerProps) => 
                     </p>
                   </div>
                 )}
+                {file.owners?.length ? (
+                  <div>
+                    <p className="text-muted-foreground">Proprietário</p>
+                    <p className="font-medium">{file.owners[0].displayName}</p>
+                    <p className="text-xs text-muted-foreground">{file.owners[0].emailAddress}</p>
+                  </div>
+                ) : null}
                 {file.appProperties && (
                   <div>
                     <p className="text-muted-foreground">Tags</p>

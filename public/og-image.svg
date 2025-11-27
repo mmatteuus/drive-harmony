@@ -1,0 +1,19 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-label="Drive Harmony">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grad)" rx="32" />
+  <g fill="#0f172a" opacity="0.08">
+    <rect x="80" y="80" width="220" height="130" rx="24" />
+    <rect x="380" y="120" width="280" height="160" rx="30" />
+    <rect x="740" y="80" width="320" height="200" rx="28" />
+    <rect x="140" y="320" width="360" height="180" rx="26" />
+    <rect x="600" y="340" width="440" height="190" rx="32" />
+  </g>
+  <text x="140" y="290" font-family="'Segoe UI', 'Inter', system-ui, sans-serif" font-size="96" font-weight="700" fill="#f8fafc">Drive Harmony</text>
+  <text x="140" y="360" font-family="'Segoe UI', 'Inter', system-ui, sans-serif" font-size="32" fill="#e2e8f0">Portal premium para o seu Google Drive</text>
+  <text x="1040" y="540" font-size="120" text-anchor="end" dominant-baseline="middle">📁</text>
+</svg>

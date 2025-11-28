@@ -23,6 +23,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [googleReady, setGoogleReady] = useState(false);
   const [loading, setLoading] = useState(false);
+  const hasClientId = Boolean(GOOGLE_CLIENT_ID);
 
   const verifyDriveAccess = useCallback(async (accessToken: string) => {
     try {
@@ -49,8 +50,8 @@ const Login = () => {
   }, []);
 
   const handleSignIn = () => {
-    if (!GOOGLE_CLIENT_ID) {
-      toast.error("Configure a variável VITE_GOOGLE_CLIENT_ID antes de continuar.");
+    if (!hasClientId) {
+      toast.error("Configure a variável VITE_GOOGLE_CLIENT_ID e reinicie o servidor.");
       return;
     }
 
@@ -63,7 +64,7 @@ const Login = () => {
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
       scope: GOOGLE_SCOPES,
-      prompt: "consent",
+      prompt: "consent select_account",
       callback: async (tokenResponse) => {
         if (!tokenResponse?.access_token) {
           toast.error("Não foi possível obter o token de acesso.");
@@ -86,6 +87,11 @@ const Login = () => {
   };
 
   useEffect(() => {
+    if (!hasClientId) {
+      toast.error("VITE_GOOGLE_CLIENT_ID não configurado. Adicione no arquivo .env e reinicie.");
+      return;
+    }
+
     const initGoogleScript = () => {
       if (window.google?.accounts?.oauth2) {
         setGoogleReady(true);

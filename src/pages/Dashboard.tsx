@@ -51,6 +51,23 @@ const DEFAULT_FILTERS: DriveFilters = {
   tags: "",
 };
 
+const FILTERS_STORAGE_KEY = "drive_harmony_filters";
+
+const loadStoredFilters = (): DriveFilters => {
+  if (typeof window === "undefined") return DEFAULT_FILTERS;
+
+  const storedFilters = localStorage.getItem(FILTERS_STORAGE_KEY);
+  if (!storedFilters) return DEFAULT_FILTERS;
+
+  try {
+    const parsed = JSON.parse(storedFilters) as Partial<DriveFilters>;
+    return { ...DEFAULT_FILTERS, ...parsed };
+  } catch (error) {
+    console.error("Error parsing stored filters:", error);
+    return DEFAULT_FILTERS;
+  }
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState<DriveFile[]>([]);
@@ -63,7 +80,7 @@ const Dashboard = () => {
   const [breadcrumb, setBreadcrumb] = useState<Array<{ id: string; name: string }>>([
     { id: "root", name: "Meu Drive" },
   ]);
-  const [filters, setFilters] = useState<DriveFilters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<DriveFilters>(() => loadStoredFilters());
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
@@ -73,6 +90,7 @@ const Dashboard = () => {
 
   const logoutAndRedirect = useCallback(() => {
     localStorage.removeItem("google_access_token");
+    localStorage.removeItem(FILTERS_STORAGE_KEY);
     setFiles([]);
     setNextPageToken(null);
     setSelectedFile(null);
@@ -239,6 +257,7 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem("google_access_token");
     localStorage.removeItem("google_id_token");
+    localStorage.removeItem(FILTERS_STORAGE_KEY);
     navigate("/");
     toast.success("Sessão encerrada.");
   };

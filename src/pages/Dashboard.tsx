@@ -251,6 +251,10 @@ const Dashboard = () => {
   }, [fetchAccountInfo, fetchUserInfo, navigate]);
 
   useEffect(() => {
+    localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
+  }, [filters]);
+
+  useEffect(() => {
     fetchFiles({ filters });
   }, [currentFolderId, filters, fetchFiles]);
 

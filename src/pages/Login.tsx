@@ -23,6 +23,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [googleReady, setGoogleReady] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string>("");
   const hasClientId = Boolean(GOOGLE_CLIENT_ID);
 
   const verifyDriveAccess = useCallback(async (accessToken: string) => {
@@ -88,6 +89,7 @@ const Login = () => {
 
   useEffect(() => {
     if (!hasClientId) {
+      setStatusMessage("VITE_GOOGLE_CLIENT_ID não configurado. Adicione no arquivo .env e reinicie o servidor.");
       toast.error("VITE_GOOGLE_CLIENT_ID não configurado. Adicione no arquivo .env e reinicie.");
       return;
     }
@@ -95,6 +97,7 @@ const Login = () => {
     const initGoogleScript = () => {
       if (window.google?.accounts?.oauth2) {
         setGoogleReady(true);
+        setStatusMessage("");
         return;
       }
 
@@ -104,6 +107,7 @@ const Login = () => {
       if (existingScript) {
         if (window.google?.accounts?.oauth2) {
           setGoogleReady(true);
+          setStatusMessage("");
         } else {
           existingScript.addEventListener("load", () => setGoogleReady(true), { once: true });
         }
@@ -116,7 +120,10 @@ const Login = () => {
       script.async = true;
       script.defer = true;
       script.onload = () => setGoogleReady(true);
-      script.onerror = () => toast.error("Não foi possível carregar o Google Identity Services");
+      script.onerror = () => {
+        setStatusMessage("Não foi possível carregar o Google Identity Services. Verifique sua rede e recarregue.");
+        toast.error("Não foi possível carregar o Google Identity Services");
+      };
       document.body.appendChild(script);
     };
 
@@ -129,8 +136,16 @@ const Login = () => {
       }
     };
 
-    validateExistingSession().finally(initGoogleScript);
-  }, [navigate, verifyDriveAccess]);
+    validateExistingSession().finally(() => {
+      initGoogleScript();
+      // se após 5s não habilitar, avisa o usuário
+      setTimeout(() => {
+        if (!window.google?.accounts?.oauth2 && !statusMessage) {
+          setStatusMessage("Não foi possível iniciar o Google login. Recarregue a página ou verifique bloqueios de script.");
+        }
+      }, 5000);
+    });
+  }, [navigate, statusMessage, verifyDriveAccess]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary to-background p-4">
@@ -156,11 +171,14 @@ const Login = () => {
             <Button
               onClick={handleSignIn}
               size="lg"
-              disabled={!googleReady || loading}
+              disabled={!googleReady || loading || !hasClientId}
               className="w-full h-14 text-lg font-semibold shadow-elegant hover:shadow-xl transition-all duration-300"
             >
               {loading ? "Conectando..." : "Entrar com Google"}
             </Button>
+            {statusMessage && (
+              <p className="text-sm text-destructive text-center">{statusMessage}</p>
+            )}
             <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
               <ShieldCheck className="h-4 w-4" />
               Usamos apenas as permissões necessárias para acessar seus arquivos. O conteúdo fica sempre no seu Drive.

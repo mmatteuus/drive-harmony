@@ -92,9 +92,18 @@ export const FilesGrid = ({
               onClick={() => onFileClick(file)}
             >
               <div className="space-y-3">
-                <div className="flex items-start justify-between">
+                <div className="h-24 w-full rounded-xl overflow-hidden flex items-center justify-center bg-slate-100">
                   {isFolder ? (
-                    <FolderIcon className="h-10 w-10 text-primary" />
+                    <FolderIcon className="h-12 w-12 text-primary" />
+                  ) : file.hasThumbnail && file.thumbnailLink ? (
+                    <img
+                      src={file.thumbnailLink}
+                      alt={file.name}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : file.iconLink ? (
+                    <img src={file.iconLink} alt={file.name} className="h-10 w-10 opacity-70" loading="lazy" />
                   ) : (
                     <FileIcon className="h-10 w-10 text-accent" />
                   )}

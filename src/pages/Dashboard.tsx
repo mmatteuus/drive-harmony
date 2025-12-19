@@ -1,5 +1,6 @@
 ﻿import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { FilesGrid } from "@/components/dashboard/FilesGrid";
 import { FileDetailsDrawer } from "@/components/dashboard/FileDetailsDrawer";
@@ -14,12 +15,14 @@ export interface DriveFile {
   id: string;
   name: string;
   mimeType: string;
-  modifiedTime: string;
+  modifiedTime?: string;
   size?: string;
   parents?: string[];
   webViewLink?: string;
   appProperties?: Record<string, string>;
   iconLink?: string;
+  thumbnailLink?: string;
+  hasThumbnail?: boolean;
   owners?: Array<{ displayName?: string; emailAddress?: string }>;
 }
 
@@ -76,6 +79,7 @@ const Dashboard = () => {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [accountInfo, setAccountInfo] = useState<AccountInfo | null>(null);
   const [selectedFile, setSelectedFile] = useState<DriveFile | null>(null);
+  const [previewFile, setPreviewFile] = useState<DriveFile | null>(null);
   const [currentFolderId, setCurrentFolderId] = useState<string>("root");
   const [breadcrumb, setBreadcrumb] = useState<Array<{ id: string; name: string }>>([
     { id: "root", name: "Meu Drive" },
@@ -94,6 +98,7 @@ const Dashboard = () => {
     setFiles([]);
     setNextPageToken(null);
     setSelectedFile(null);
+    setPreviewFile(null);
     setUserInfo(null);
     toast.error("Sessão expirada. Faça login novamente.");
     navigate("/");
@@ -205,7 +210,25 @@ const Dashboard = () => {
         url.searchParams.set("q", query);
         url.searchParams.set(
           "fields",
-          "nextPageToken,files(id,name,mimeType,modifiedTime,size,parents,webViewLink,iconLink,appProperties,owners(displayName,emailAddress))",
+          [
+            "nextPageToken",
+            "files(",
+            [
+              "id",
+              "name",
+              "mimeType",
+              "modifiedTime",
+              "size",
+              "parents",
+              "webViewLink",
+              "iconLink",
+              "thumbnailLink",
+              "hasThumbnail",
+              "appProperties",
+              "owners(displayName,emailAddress)",
+            ].join(","),
+            ")",
+          ].join(""),
         );
         url.searchParams.set("pageSize", "50");
         if (options?.pageToken) {
@@ -273,6 +296,10 @@ const Dashboard = () => {
     }
   };
 
+  const handlePreview = (file: DriveFile) => {
+    setPreviewFile(file);
+  };
+
   const handleBreadcrumbClick = (index: number) => {
     const newBreadcrumb = breadcrumb.slice(0, index + 1);
     setBreadcrumb(newBreadcrumb);
@@ -283,7 +310,7 @@ const Dashboard = () => {
     if (file.mimeType === "application/vnd.google-apps.folder") {
       handleFolderClick(file);
     } else {
-      setSelectedFile(file);
+      handlePreview(file);
     }
   };
 
@@ -342,6 +369,53 @@ const Dashboard = () => {
           onUploadClick={() => setIsUploadOpen(true)}
         />
       </main>
+
+      {previewFile && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-[90vw] max-w-6xl h-[80vh] overflow-hidden flex flex-col">
+            <header className="flex items-center justify-between px-4 py-3 border-b gap-2">
+              <div className="min-w-0">
+                <p className="font-semibold truncate">{previewFile.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{previewFile.mimeType}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setPreviewFile(null);
+                    setSelectedFile(previewFile);
+                  }}
+                >
+                  Detalhes
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    window.open(
+                      previewFile.webViewLink ?? `https://drive.google.com/file/d/${previewFile.id}/preview`,
+                      "_blank",
+                    )
+                  }
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Abrir no Drive
+                </Button>
+                <Button size="sm" onClick={() => setPreviewFile(null)}>
+                  Fechar
+                </Button>
+              </div>
+            </header>
+            <iframe
+              src={previewFile.webViewLink ?? `https://drive.google.com/file/d/${previewFile.id}/preview`}
+              className="flex-1 w-full border-0 bg-slate-50"
+              allow="autoplay; fullscreen"
+              title={previewFile.name}
+            />
+          </div>
+        </div>
+      )}
 
       <FileDetailsDrawer file={selectedFile} onClose={() => setSelectedFile(null)} />
 

@@ -210,25 +210,7 @@ const Dashboard = () => {
         url.searchParams.set("q", query);
         url.searchParams.set(
           "fields",
-          [
-            "nextPageToken",
-            "files(",
-            [
-              "id",
-              "name",
-              "mimeType",
-              "modifiedTime",
-              "size",
-              "parents",
-              "webViewLink",
-              "iconLink",
-              "thumbnailLink",
-              "hasThumbnail",
-              "appProperties",
-              "owners(displayName,emailAddress)",
-            ].join(","),
-            ")",
-          ].join(""),
+          "nextPageToken,files(id,name,mimeType,modifiedTime,size,parents,webViewLink,iconLink,thumbnailLink,hasThumbnail,appProperties,owners(displayName,emailAddress))",
         );
         url.searchParams.set("pageSize", "50");
         if (options?.pageToken) {

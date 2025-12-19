@@ -1,6 +1,5 @@
 ﻿import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink } from "lucide-react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { FilesGrid } from "@/components/dashboard/FilesGrid";
 import { FileDetailsDrawer } from "@/components/dashboard/FileDetailsDrawer";
@@ -10,21 +9,8 @@ import { CreateFolderDialog } from "@/components/dashboard/CreateFolderDialog";
 import { AccountDrawer } from "@/components/dashboard/AccountDrawer";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-
-export interface DriveFile {
-  id: string;
-  name: string;
-  mimeType: string;
-  modifiedTime?: string;
-  size?: string;
-  parents?: string[];
-  webViewLink?: string;
-  appProperties?: Record<string, string>;
-  iconLink?: string;
-  thumbnailLink?: string;
-  hasThumbnail?: boolean;
-  owners?: Array<{ displayName?: string; emailAddress?: string }>;
-}
+import type { DriveFile } from "@/types/drive";
+import { FilePreviewModal } from "@/components/crm/FilePreviewModal";
 
 interface UserInfo {
   name?: string;
@@ -353,53 +339,21 @@ const Dashboard = () => {
       </main>
 
       {previewFile && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-[90vw] max-w-6xl h-[80vh] overflow-hidden flex flex-col">
-            <header className="flex items-center justify-between px-4 py-3 border-b gap-2">
-              <div className="min-w-0">
-                <p className="font-semibold truncate">{previewFile.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{previewFile.mimeType}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setPreviewFile(null);
-                    setSelectedFile(previewFile);
-                  }}
-                >
-                  Detalhes
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() =>
-                    window.open(
-                      previewFile.webViewLink ?? `https://drive.google.com/file/d/${previewFile.id}/preview`,
-                      "_blank",
-                    )
-                  }
-                >
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Abrir no Drive
-                </Button>
-                <Button size="sm" onClick={() => setPreviewFile(null)}>
-                  Fechar
-                </Button>
-              </div>
-            </header>
-            <iframe
-              src={previewFile.webViewLink ?? `https://drive.google.com/file/d/${previewFile.id}/preview`}
-              className="flex-1 w-full border-0 bg-slate-50"
-              allow="autoplay; fullscreen"
-              title={previewFile.name}
-            />
-          </div>
-        </div>
+        <FilePreviewModal
+          file={previewFile}
+          onClose={() => setPreviewFile(null)}
+          onOpenDetails={() => {
+            setPreviewFile(null);
+            setSelectedFile(previewFile);
+          }}
+        />
       )}
 
-      <FileDetailsDrawer file={selectedFile} onClose={() => setSelectedFile(null)} />
+      <FileDetailsDrawer
+        file={selectedFile}
+        onClose={() => setSelectedFile(null)}
+        onLinked={() => fetchFiles({ filters })}
+      />
 
       <UploadDialog
         open={isUploadOpen}

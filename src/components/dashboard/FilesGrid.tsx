@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { DriveFile } from "@/pages/Dashboard";
+import type { DriveFile } from "@/types/drive";
 import { format } from "date-fns";
 
 interface FilesGridProps {

@@ -1,6 +1,7 @@
 import { CloudIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 
 interface DashboardHeaderProps {
   userInfo: any;
@@ -23,6 +24,9 @@ export const DashboardHeader = ({ userInfo, onLogout, onOpenAccount }: Dashboard
 
         {userInfo && (
           <div className="flex items-center gap-4">
+            <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
+              <Link to="/crm/customers">CRM</Link>
+            </Button>
             <div className="hidden sm:flex items-center gap-3">
               <div className="text-right">
                 <p className="text-sm font-medium">{userInfo.name}</p>

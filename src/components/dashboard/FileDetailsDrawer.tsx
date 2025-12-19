@@ -1,16 +1,20 @@
 ﻿import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Download, ExternalLink } from "lucide-react";
-import type { DriveFile } from "@/pages/Dashboard";
+import type { DriveFile } from "@/types/drive";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useState } from "react";
+import { LinkToCustomerDialog } from "@/components/crm/LinkToCustomerDialog";
 
 interface FileDetailsDrawerProps {
   file: DriveFile | null;
   onClose: () => void;
+  onLinked?: () => void;
 }
 
-export const FileDetailsDrawer = ({ file, onClose }: FileDetailsDrawerProps) => {
+export const FileDetailsDrawer = ({ file, onClose, onLinked }: FileDetailsDrawerProps) => {
+  const [linkOpen, setLinkOpen] = useState(false);
   const handleDownload = async () => {
     if (!file) return;
 
@@ -113,10 +117,24 @@ export const FileDetailsDrawer = ({ file, onClose }: FileDetailsDrawerProps) => 
                   Abrir no Google Drive
                 </Button>
               )}
+              <Button variant="secondary" className="w-full" onClick={() => setLinkOpen(true)}>
+                Vincular a cliente
+              </Button>
             </div>
           </div>
         )}
       </SheetContent>
+      {file && (
+        <LinkToCustomerDialog
+          open={linkOpen}
+          onOpenChange={setLinkOpen}
+          file={file}
+          onLinked={() => {
+            onLinked?.();
+            onClose();
+          }}
+        />
+      )}
     </Sheet>
   );
 };

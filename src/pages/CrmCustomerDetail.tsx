@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+﻿import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export default function CrmCustomerDetail() {
     try {
       await api.sync();
       await query.refetch();
-      toast.success("Sincronização concluída.");
+      toast.success("SincronizaÃ§Ã£o concluÃ­da.");
     } catch (error) {
       console.error(error);
       toast.error("Falha ao sincronizar.");
@@ -43,16 +43,13 @@ export default function CrmCustomerDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="container mx-auto px-4 pt-16 pb-14 sm:pt-6 sm:pb-6 space-y-6">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="space-y-1">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/crm/customers">← Voltar</Link>
-            </Button>
-            <h1 className="text-2xl font-bold">{customer?.name ?? "Cliente"}</h1>
-            <p className="text-sm text-muted-foreground">{customer?.email ?? "—"}</p>
+<h1 className="text-2xl font-bold">{customer?.name ?? "Cliente"}</h1>
+            <p className="text-sm text-muted-foreground">{customer?.email ?? "-"}</p>
           </div>
-          <Button variant="outline" onClick={handleSync}>
+          <Button variant="outline" onClick={handleSync} className="w-full sm:w-auto">
             Sincronizar
           </Button>
         </div>
@@ -77,7 +74,7 @@ export default function CrmCustomerDetail() {
               <Input id="dateFrom" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
             </div>
             <div className="space-y-1">
-              <Label htmlFor="dateTo">Até</Label>
+              <Label htmlFor="dateTo">AtÃ©</Label>
               <Input id="dateTo" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
             </div>
           </div>
@@ -106,22 +103,22 @@ export default function CrmCustomerDetail() {
                   <div className="space-y-1">
                     <p className="font-medium line-clamp-2">{doc.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      {doc.category ?? "—"} {doc.stage ? `• ${doc.stage}` : ""}
+                      {doc.category ?? "-"} {doc.stage ? `• ${doc.stage}` : ""}
                     </p>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1"
+                      className="w-full sm:flex-1"
                       onClick={() =>
                         window.open(file.webViewLink ?? `https://drive.google.com/file/d/${file.id}/preview`, "_blank")
                       }
                     >
                       Abrir no Drive
                     </Button>
-                    <Button size="sm" className="flex-1" onClick={() => setPreviewFile(file)} disabled={isFolder}>
+                    <Button size="sm" className="w-full sm:flex-1" onClick={() => setPreviewFile(file)} disabled={isFolder}>
                       Preview
                     </Button>
                   </div>
@@ -136,3 +133,6 @@ export default function CrmCustomerDetail() {
     </div>
   );
 }
+
+
+

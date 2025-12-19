@@ -2,7 +2,15 @@ import { Router } from "express";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 import { db, type CustomerRow, type DocumentRow } from "../db";
-import { driveGetFile, requireAccessToken, type DriveFile } from "../googleDrive";
+import {
+  driveCreateFolder,
+  driveCreateSpreadsheet,
+  driveGetFile,
+  requireAccessToken,
+  sheetsWriteValues,
+  type DriveFile,
+} from "../googleDrive";
+import { env } from "../env";
 
 const nowIso = () => new Date().toISOString();
 
@@ -37,27 +45,64 @@ customersRouter.get("/", (req, res) => {
   res.json({ customers: rows });
 });
 
-customersRouter.post("/", (req, res) => {
+customersRouter.post("/", async (req, res) => {
   const parsed = customerCreateSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  let accessToken: string;
+  try {
+    accessToken = requireAccessToken(req.header("authorization"));
+  } catch {
+    return res.status(401).json({ error: "missing_access_token" });
+  }
+
+  const rootFolderId = String(env.driveRootFolderId ?? "").trim();
+  if (!rootFolderId) return res.status(400).json({ error: "missing_root_folder_id" });
 
   const id = randomUUID();
   const timestamp = nowIso();
   const email = parsed.data.email?.trim() ? parsed.data.email.trim() : null;
   const phone = parsed.data.phone?.trim() ? parsed.data.phone.trim() : null;
   const status = parsed.data.status ?? "lead";
+  const customerName = parsed.data.name.trim();
+
+  const folder = await driveCreateFolder(accessToken, {
+    name: customerName,
+    parentId: rootFolderId,
+    appProperties: { customerId: id, kind: "crm_customer" },
+  });
+
+  const sheet = await driveCreateSpreadsheet(accessToken, {
+    name: "Cliente.xlsx",
+    parentId: folder.id,
+    appProperties: { customerId: id, kind: "crm_customer_sheet" },
+  });
+
+  try {
+    await sheetsWriteValues(accessToken, sheet.id, {
+      range: "A1:G2",
+      values: [
+        ["ID", "Nome", "E-mail", "Telefone", "Status", "Criado em", "Atualizado em"],
+        [id, customerName, email ?? "", phone ?? "", status, timestamp, timestamp],
+      ],
+    });
+  } catch {
+    // If Sheets scope is missing, we still keep folder + sheet created.
+  }
 
   db.prepare(
     `
-    insert into customers (id, name, email, phone, status, created_at, updated_at)
-    values (@id, @name, @email, @phone, @status, @created_at, @updated_at)
+    insert into customers (id, name, email, phone, status, drive_folder_id, sheet_file_id, created_at, updated_at)
+    values (@id, @name, @email, @phone, @status, @drive_folder_id, @sheet_file_id, @created_at, @updated_at)
   `,
   ).run({
     id,
-    name: parsed.data.name.trim(),
+    name: customerName,
     email,
     phone,
     status,
+    drive_folder_id: folder.id,
+    sheet_file_id: sheet.id,
     created_at: timestamp,
     updated_at: timestamp,
   });

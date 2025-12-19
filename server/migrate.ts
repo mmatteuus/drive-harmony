@@ -30,5 +30,16 @@ export const migrate = () => {
     create index if not exists idx_documents_drive_modified_time on documents(drive_modified_time);
     create index if not exists idx_documents_title on documents(title);
   `);
-};
 
+  // Backwards-compatible column adds for CRM Drive integration.
+  try {
+    db.exec("alter table customers add column drive_folder_id text");
+  } catch {
+    // ignore if already exists
+  }
+  try {
+    db.exec("alter table customers add column sheet_file_id text");
+  } catch {
+    // ignore if already exists
+  }
+};

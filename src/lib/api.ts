@@ -61,8 +61,15 @@ export const api = {
   listCustomers: (search?: string) =>
     jsonFetch<{ customers: Customer[] }>(`/api/customers${search ? `?search=${encodeURIComponent(search)}` : ""}`),
 
-  createCustomer: (input: { name: string; email?: string; phone?: string; status?: Customer["status"] }) =>
-    jsonFetch<{ customer: Customer }>("/api/customers", { method: "POST", body: JSON.stringify(input) }),
+  createCustomer: (input: { name: string; email?: string; phone?: string; status?: Customer["status"] }) => {
+    const token = getAccessToken();
+    if (!token) throw new Error("missing_access_token");
+    return jsonFetch<{ customer: Customer }>("/api/customers", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(input),
+    });
+  },
 
   getCustomer: (id: string) => jsonFetch<{ customer: Customer }>(`/api/customers/${encodeURIComponent(id)}`),
 

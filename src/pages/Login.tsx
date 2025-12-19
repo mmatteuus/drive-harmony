@@ -9,6 +9,7 @@ const GOOGLE_SCOPES =
   import.meta.env.VITE_GOOGLE_SCOPES ||
   [
     "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/userinfo.profile",
     "https://www.googleapis.com/auth/userinfo.email",
   ].join(" ");

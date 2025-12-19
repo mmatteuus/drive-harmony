@@ -300,7 +300,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader userInfo={userInfo} onLogout={handleLogout} onOpenAccount={() => setIsAccountOpen(true)} />
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="container mx-auto px-4 pt-6 pb-14 sm:pb-6 space-y-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <SearchFilters filters={filters} onSearch={handleSearch} onReset={handleResetFilters} onChange={setFilters} />
 

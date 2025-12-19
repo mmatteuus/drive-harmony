@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
@@ -33,6 +33,11 @@ export default function CrmCustomers() {
     },
     onError: (error) => {
       console.error(error);
+      const message = error instanceof Error ? error.message : "";
+      if (message.includes("missing_access_token")) return toast.error("Faça login com Google para criar clientes.");
+      if (message.includes("missing_root_folder_id"))
+        return toast.error("Backend sem GOOGLE_DRIVE_ROOT_FOLDER_ID configurado.");
+      if (message.includes("404")) return toast.error("Backend não encontrado (404)." );
       toast.error("Não foi possível criar o cliente.");
     },
   });
@@ -40,7 +45,7 @@ export default function CrmCustomers() {
   const handleSync = async () => {
     try {
       await api.sync();
-      toast.success("Sincronização concluída.");
+      toast.success("SincronizaÃ§Ã£o concluÃ­da.");
     } catch (error) {
       console.error(error);
       toast.error("Falha ao sincronizar.");
@@ -49,13 +54,13 @@ export default function CrmCustomers() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="container mx-auto px-4 pt-16 pb-14 sm:pt-6 sm:pb-6 space-y-6">
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h1 className="text-2xl font-bold">CRM</h1>
             <p className="text-sm text-muted-foreground">Clientes e documentos vinculados ao Drive.</p>
           </div>
-          <Button variant="outline" onClick={handleSync}>
+          <Button variant="outline" onClick={handleSync} className="w-full sm:w-auto">
             Sincronizar Drive
           </Button>
         </div>
@@ -90,7 +95,7 @@ export default function CrmCustomers() {
               <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
           </div>
-          <Button disabled={!name.trim() || createMutation.isPending} onClick={() => createMutation.mutate()}>
+          <Button disabled={!name.trim() || createMutation.isPending} onClick={() => createMutation.mutate()} className="w-full sm:w-auto">
             {createMutation.isPending ? "Criando..." : "Criar cliente"}
           </Button>
         </Card>
@@ -109,7 +114,7 @@ export default function CrmCustomers() {
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{customer.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{customer.email ?? "—"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{customer.email ?? "-"}</p>
                 </div>
                 <span className="text-xs text-muted-foreground">{customer.documentCount ?? 0} docs</span>
               </div>
@@ -123,4 +128,6 @@ export default function CrmCustomers() {
     </div>
   );
 }
+
+
 

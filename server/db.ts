@@ -22,6 +22,8 @@ export type CustomerRow = {
   email: string | null;
   phone: string | null;
   status: string;
+  drive_folder_id?: string | null;
+  sheet_file_id?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -39,4 +41,3 @@ export type DocumentRow = {
   created_at: string;
   updated_at: string;
 };
-
